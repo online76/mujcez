@@ -141,9 +141,11 @@ class MujCezCard extends HTMLElement {
         <div class="s">${a.zaloha ? `${esc(a.zaloha_frekvence || '')}${a.zaloha_pristi ? ` · další ${dt(a.zaloha_pristi)}` : ''}` : (a.mesicni_fakturace ? 'měsíční fakturace' : 'bez záloh')}</div></div>`,
       `<div class="k"><div class="l">Stav ${gas ? 'plynoměru' : 'elektroměru'}${lr.nt != null && !gas ? ' VT/NT' : ''}</div><div class="v">${meter}</div>
         <div class="s">${lr.datum ? `${dt(lr.datum)} · ${esc(lr.zpusob || '')}` : 'bez odečtu'}</div></div>`,
-      `<div class="k"><div class="l">${a.mesicni_fakturace ? 'Poslední měsíc' : 'Poslední období'}</div><div class="v">${nf(lo.kwh)} <small>kWh</small></div>
-        <div class="s">${lo.od ? `${kc(lo.kc)} · ${dt(lo.od, false)}–${dt(lo.do)}` : '–'}</div></div>`,
     ];
+    if (a.mesicni_fakturace) {
+      kpis.push(`<div class="k"><div class="l">Poslední měsíc</div><div class="v">${nf(lo.kwh)} <small>kWh</small></div>
+        <div class="s">${lo.od ? `${kc(lo.kc)} · ${dt(lo.od, false)}–${dt(lo.do)}` : '–'}</div></div>`);
+    }
     if (ly.kwh != null) {
       const m12 = ly.zpusob === 'posledních 12 měsíců';
       kpis.push(`<div class="k"><div class="l">${m12 ? 'Za 12 měsíců' : 'Roční spotřeba'}</div><div class="v">${nf(ly.kwh)} <small>kWh</small></div>
