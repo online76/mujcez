@@ -46,6 +46,8 @@ Karta se načte automaticky (není potřeba přidávat zdroj).
 type: custom:mujcez-card
 komodita: elektrina   # nebo plyn
 vychozi: Veselí 125   # výchozí odběrné místo (začátek názvu); vybrané místo si karta pamatuje
+doklady: 10           # počet řádků ve Vyúčtování a platby (nepovinné)
+odecty: 8             # počet řádků v Odečtech (nepovinné)
 ```
 
 Obsahuje výběr odběrného místa, k úhradě, zálohu, stav měřidla, spotřebu za poslední období a rok,

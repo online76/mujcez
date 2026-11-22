@@ -2,6 +2,8 @@
 // type: custom:mujcez-card
 // komodita: elektrina | plyn      (povinné)
 // vychozi: "Veselí 125"            (výchozí odběrné místo – začátek názvu; výběr si karta pamatuje)
+// doklady: 10                     (počet řádků ve Vyúčtování a platby)
+// odecty: 8                       (počet řádků v Odečtech)
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const nf = (v, d = 0) => (v === null || v === undefined || v === '' || isNaN(v)) ? '–' : Number(v).toLocaleString('cs-CZ', { minimumFractionDigits: d, maximumFractionDigits: d });
 const kc = (v) => (v === null || v === undefined) ? '–' : `${nf(v, Math.abs(v) < 100 && v % 1 ? 2 : 0)} Kč`;
@@ -16,7 +18,7 @@ const shortName = (n) => String(n || '').replace(/\s*-\s*\d{1,2}\.\d{1,2}\.\d{4}
 class MujCezCard extends HTMLElement {
   setConfig(c) {
     if (!c.komodita || !['elektrina', 'plyn'].includes(c.komodita)) throw new Error('komodita: elektrina | plyn');
-    this._c = { vychozi: 'Veselí 125', ...c };
+    this._c = { vychozi: 'Veselí 125', doklady: 10, odecty: 8, ...c };
     this._key = `mujcez-${c.komodita}`;
   }
 
@@ -155,12 +157,12 @@ class MujCezCard extends HTMLElement {
       kpis.push(`<div class="k"><div class="l">Poslední vyúčtování</div><div class="v">${kc(lv.castka)}</div>
         <div class="s">${dt(lv.datum)} · ${esc(lv.stav || '')}</div></div>`);
     }
-    const docs = (a.doklady || []).slice(0, 10).map((d) => {
+    const docs = (a.doklady || []).slice(0, Number(this._c.doklady) || 10).map((d) => {
       const cls = d.zaplaceno ? 'paid' : (d.uhradit && d.zbyva > 0 ? 'unpaid' : '');
       return `<tr><td class="n">${dt(d.datum)}</td><td>${esc(d.typ)}${d.obdobi_od && d.kod === 'VYU' ? `<br><small class="muted">${dt(d.obdobi_od, false)}–${dt(d.obdobi_do)}</small>` : ''}</td>
         <td class="r n">${kc(d.castka)}</td><td class="n">${d.splatnost ? dt(d.splatnost) : ''}</td><td><span class="st ${cls}">${esc(d.stav || (d.zaplaceno ? 'zaplaceno' : ''))}</span></td></tr>`;
     }).join('');
-    const reads = (a.odecty || []).slice().reverse().slice(0, 8).map((r) =>
+    const reads = (a.odecty || []).slice().reverse().slice(0, Number(this._c.odecty) || 8).map((r) =>
       `<tr><td class="n">${dt(r.datum)}</td><td class="r n">${nf(r.vt)}${r.nt != null && !gas ? ` / ${nf(r.nt)}` : ''} ${unit}</td>
        <td class="r">${r.spotreba != null ? nf(r.spotreba) : '–'}</td><td>${esc(r.zpusob)}</td></tr>`).join('');
     const info = [
