@@ -17,6 +17,6 @@ DATA_INTERVAL_H = 3          # stažení dat z portálu
 TOKEN_INTERVAL_MIN = 10      # udržování přihlášení (access token platí 15 min)
 
 CARD_URL = "/mujcez/mujcez-card.js"
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 
 COMMODITY = {"E1": "elektrina", "P1": "plyn"}

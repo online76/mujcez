@@ -83,15 +83,32 @@ def _readings(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
             }
         )
     out.sort(key=lambda x: x["datum"])
+    # spotřeba mezi odečty (portál u elektřiny uvádí jen VT, proto se počítá z rozdílu stavů)
+    prev = None
+    for r in out:
+        total = (r["vt"] or 0) + (r["nt"] or 0)
+        r["spotreba"] = round(total - prev, 2) if prev is not None and total >= prev else None
+        prev = total
     return out
+
+
+def _sum_months(months: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """Součet posledních 12 měsíců (u měsíční fakturace)."""
+    last = months[-12:]
+    if not last:
+        return None
+    s = lambda k: round(sum(m[k] or 0 for m in last), 2)  # noqa: E731
+    return {"od": last[0]["od"], "do": last[-1]["do"], "kwh": s("kwh"), "vt": s("vt"), "nt": s("nt"),
+            "kc": s("kc"), "zpusob": "posledních 12 měsíců"}
 
 
 def _billing(b: dict[str, Any]) -> dict[str, Any]:
     status = b.get("statusText") or ""
     total = num(b.get("billingTotalAmount"))
     rest = num(b.get("balance", b.get("billingBalance")))
-    if not total and rest:  # předpis zálohy (BBP) má částku jen ve zbývající části
-        total = rest
+    if not total:
+        # předpis zálohy (BBP) má částku jen ve zbývající části, platba (PLB) v uhrazené částce
+        total = rest or num(abs(b.get("billingEColClearingAmount") or 0)) or num(abs(b.get("billingEColPaidAmount") or 0)) or total
     if total is not None and total < 0:
         status = "OVERPAYMENT"
     return {
@@ -210,6 +227,6 @@ def parse(raw: dict[str, Any], today: date | None = None) -> dict[str, dict[str,
             "spotreba_roky": year,
             "spotreba_mesice": month[-24:],
             "posledni_obdobi": month[-1] if month else (year[-1] if year else None),
-            "posledni_rok": year[-1] if year else None,
+            "posledni_rok": _sum_months(month) if month else (year[-1] if year else None),
         }
     return out

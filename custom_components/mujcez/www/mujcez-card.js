@@ -79,7 +79,7 @@ class MujCezCard extends HTMLElement {
     const p = this._selected();
     const css = `<style>
       :host { display:block; }
-      ha-card { padding:16px; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Roboto,sans-serif; }
+      ha-card { padding:16px; max-width:1400px; margin:0 auto; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Roboto,sans-serif; }
       .top { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
       .ic { width:44px; height:44px; border-radius:12px; display:grid; place-items:center; flex:none;
             background:color-mix(in srgb, ${accent} 20%, transparent); color:${accent}; }
@@ -111,7 +111,8 @@ class MujCezCard extends HTMLElement {
       td.r, th.r { text-align:right; font-variant-numeric:tabular-nums; }
       .st { font-size:12px; padding:2px 8px; border-radius:999px; background:rgba(127,127,127,.18); white-space:nowrap; }
       .st.paid { background:rgba(48,209,88,.18); color:#30d158; } .st.unpaid { background:rgba(255,107,94,.2); color:#ff6b5e; }
-      .grid2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:0 24px; }
+      .grid2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(360px,1fr)); gap:0 28px; }
+      td.n { white-space:nowrap; }
       dl { display:grid; grid-template-columns:auto 1fr; gap:6px 14px; margin:0; font-size:13.5px; }
       dt { color:var(--secondary-text-color); } dd { margin:0; color:var(--primary-text-color); }
       .muted { color:var(--secondary-text-color); font-size:13px; padding:8px 0; }
@@ -143,9 +144,10 @@ class MujCezCard extends HTMLElement {
       `<div class="k"><div class="l">${a.mesicni_fakturace ? 'Poslední měsíc' : 'Poslední období'}</div><div class="v">${nf(lo.kwh)} <small>kWh</small></div>
         <div class="s">${lo.od ? `${kc(lo.kc)} · ${dt(lo.od, false)}–${dt(lo.do)}` : '–'}</div></div>`,
     ];
-    if (!a.mesicni_fakturace || (a.spotreba_roky || []).length) {
-      kpis.push(`<div class="k"><div class="l">Roční spotřeba</div><div class="v">${nf(ly.kwh)} <small>kWh</small></div>
-        <div class="s">${ly.od ? `${kc(ly.kc)} · ${String(ly.od).slice(0, 4)}/${String(ly.do).slice(2, 4)}` : '–'}</div></div>`);
+    if (ly.kwh != null) {
+      const m12 = ly.zpusob === 'posledních 12 měsíců';
+      kpis.push(`<div class="k"><div class="l">${m12 ? 'Za 12 měsíců' : 'Roční spotřeba'}</div><div class="v">${nf(ly.kwh)} <small>kWh</small></div>
+        <div class="s">${ly.od ? `${kc(ly.kc)} · ${m12 ? `${dt(ly.od)} – ${dt(ly.do)}` : `${String(ly.od).slice(0, 4)}/${String(ly.do).slice(2, 4)}`}` : '–'}</div></div>`);
     }
     if (lv) {
       kpis.push(`<div class="k"><div class="l">Poslední vyúčtování</div><div class="v">${kc(lv.castka)}</div>
@@ -153,11 +155,11 @@ class MujCezCard extends HTMLElement {
     }
     const docs = (a.doklady || []).slice(0, 10).map((d) => {
       const cls = d.zaplaceno ? 'paid' : (d.uhradit && d.zbyva > 0 ? 'unpaid' : '');
-      return `<tr><td>${dt(d.datum)}</td><td>${esc(d.typ)}${d.obdobi_od && d.kod === 'VYU' ? `<br><small class="muted">${dt(d.obdobi_od, false)}–${dt(d.obdobi_do)}</small>` : ''}</td>
-        <td class="r">${kc(d.castka)}</td><td>${d.splatnost ? dt(d.splatnost) : ''}</td><td><span class="st ${cls}">${esc(d.stav || (d.zaplaceno ? 'zaplaceno' : ''))}</span></td></tr>`;
+      return `<tr><td class="n">${dt(d.datum)}</td><td>${esc(d.typ)}${d.obdobi_od && d.kod === 'VYU' ? `<br><small class="muted">${dt(d.obdobi_od, false)}–${dt(d.obdobi_do)}</small>` : ''}</td>
+        <td class="r n">${kc(d.castka)}</td><td class="n">${d.splatnost ? dt(d.splatnost) : ''}</td><td><span class="st ${cls}">${esc(d.stav || (d.zaplaceno ? 'zaplaceno' : ''))}</span></td></tr>`;
     }).join('');
     const reads = (a.odecty || []).slice().reverse().slice(0, 8).map((r) =>
-      `<tr><td>${dt(r.datum)}</td><td class="r">${nf(r.vt)}${r.nt != null && !gas ? ` / ${nf(r.nt)}` : ''} ${unit}</td>
+      `<tr><td class="n">${dt(r.datum)}</td><td class="r n">${nf(r.vt)}${r.nt != null && !gas ? ` / ${nf(r.nt)}` : ''} ${unit}</td>
        <td class="r">${r.spotreba != null ? nf(r.spotreba) : '–'}</td><td>${esc(r.zpusob)}</td></tr>`).join('');
     const info = [
       ['Produkt', a.produkt],
