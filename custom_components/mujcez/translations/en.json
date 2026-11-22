@@ -1,0 +1,29 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Sign in to Můj ČEZ",
+        "description": "1. Open **[Můj ČEZ sign-in]({url})** and sign in as usual.\n2. You end on a page whose address starts with `https://muj.cez.cz/col/auth-callback?code=…` (the page may stay blank or show an error – that's fine).\n3. Copy the **whole address** from the browser's address bar and paste it here.\n\nYour password is never entered into Home Assistant.",
+        "data": {
+          "callback_url": "Address after sign-in"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate Můj ČEZ",
+        "description": "1. Open **[Můj ČEZ sign-in]({url})** and sign in as usual.\n2. You end on a page whose address starts with `https://muj.cez.cz/col/auth-callback?code=…` (the page may stay blank or show an error – that's fine).\n3. Copy the **whole address** from the browser's address bar and paste it here.\n\nYour password is never entered into Home Assistant.",
+        "data": {
+          "callback_url": "Address after sign-in"
+        }
+      }
+    },
+    "error": {
+      "no_code": "The pasted address contains no code.",
+      "invalid_code": "The code is invalid or already used. Open the link again.",
+      "cannot_connect": "Cannot reach Můj ČEZ."
+    },
+    "abort": {
+      "already_configured": "Account already configured.",
+      "reauth_successful": "Re-authentication successful."
+    }
+  }
+}

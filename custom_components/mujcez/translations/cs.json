@@ -1,0 +1,29 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Přihlášení do Můj ČEZ",
+        "description": "1. Otevři **[přihlášení do Můj ČEZ]({url})** a přihlas se jako obvykle.\n2. Po přihlášení skončíš na stránce Můj ČEZ, jejíž adresa začíná `https://muj.cez.cz/col/auth-callback?code=…` (stránka může zůstat prázdná nebo hlásit chybu – to nevadí).\n3. Zkopíruj **celou adresu** z adresního řádku prohlížeče a vlož ji sem.\n\nHeslo se do Home Assistantu nikdy nezadává. Odkaz platí jen pro toto přihlášení.",
+        "data": {
+          "callback_url": "Adresa po přihlášení"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Znovu přihlásit Můj ČEZ",
+        "description": "1. Otevři **[přihlášení do Můj ČEZ]({url})** a přihlas se jako obvykle.\n2. Po přihlášení skončíš na stránce Můj ČEZ, jejíž adresa začíná `https://muj.cez.cz/col/auth-callback?code=…` (stránka může zůstat prázdná nebo hlásit chybu – to nevadí).\n3. Zkopíruj **celou adresu** z adresního řádku prohlížeče a vlož ji sem.\n\nHeslo se do Home Assistantu nikdy nezadává. Odkaz platí jen pro toto přihlášení.",
+        "data": {
+          "callback_url": "Adresa po přihlášení"
+        }
+      }
+    },
+    "error": {
+      "no_code": "Ve vložené adrese chybí kód (…?code=…). Zkopíruj celou adresu z adresního řádku.",
+      "invalid_code": "Kód je neplatný nebo už byl použit. Otevři odkaz znovu a vlož novou adresu.",
+      "cannot_connect": "Portál Můj ČEZ neodpovídá, zkus to za chvíli."
+    },
+    "abort": {
+      "already_configured": "Tento účet už je přidaný.",
+      "reauth_successful": "Přihlášení obnoveno."
+    }
+  }
+}
