@@ -13,7 +13,7 @@ API_URL = "https://muj.cez.cz/col-api/prod/1.0"
 CONF_REFRESH_TOKEN = "refresh_token"
 CONF_DEVICE_ID = "device_id"
 
-DATA_INTERVAL_H = 3          # stažení dat z portálu
+DATA_INTERVAL_H = 24          # stažení dat z portálu (1× denně, a po startu HA)
 TOKEN_INTERVAL_MIN = 10      # udržování přihlášení (access token platí 15 min)
 
 CARD_URL = "/mujcez/mujcez-card.js"

@@ -21,7 +21,7 @@ Pro každé odběrné místo (EAN / EIC):
 | Produkt | produkt, platnost, text smlouvy, distributor, sazba, jistič |
 | Přehled | všechna data místa v atributech (pro kartu) |
 
-Data se stahují každé 3 hodiny, přihlášení se udržuje každých 10 minut.
+Data se stahují jednou denně (a po startu HA), přihlášení se udržuje každých 10 minut.
 
 ## Instalace
 
