@@ -17,7 +17,9 @@ READ_METHOD = {
 }
 
 STATUS = {"PAID": "zaplaceno", "UNPAID": "nezaplaceno", "PARTIALLY_PAID": "částečně zaplaceno",
-          "OVERDUE": "po splatnosti"}
+          "OVERDUE": "po splatnosti", "OVERPAYMENT": "přeplatek"}
+
+ADVANCE_KINDS = ("BBP", "ZAL")
 
 
 def cb(value: Any) -> Any:
@@ -86,14 +88,20 @@ def _readings(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 def _billing(b: dict[str, Any]) -> dict[str, Any]:
     status = b.get("statusText") or ""
+    total = num(b.get("billingTotalAmount"))
+    rest = num(b.get("balance", b.get("billingBalance")))
+    if not total and rest:  # předpis zálohy (BBP) má částku jen ve zbývající části
+        total = rest
+    if total is not None and total < 0:
+        status = "OVERPAYMENT"
     return {
         "typ": b.get("billingAccountingDocumentTypeText") or b.get("billingAccountingDocumentType") or "",
         "kod": b.get("billingAccountingDocumentType") or "",
         "cislo": b.get("billingAccountingDocumentNumber") or "",
         "datum": b.get("billingAccountingDocumentDate") or b.get("billingAccountingDocumentAcquisitionDate"),
         "splatnost": b.get("billingMaturityDate"),
-        "castka": num(b.get("billingTotalAmount")),
-        "zbyva": num(b.get("balance", b.get("billingBalance"))),
+        "castka": total,
+        "zbyva": rest,
         "zaplaceno": bool(b.get("isPaid")),
         "uhradit": bool(b.get("shouldBePaid")),
         "preplatek": bool(b.get("isOverpayment") or b.get("billingIsNegative")),
@@ -126,7 +134,18 @@ def parse(raw: dict[str, Any], today: date | None = None) -> dict[str, dict[str,
         code = sp.get("supplyPointCode") or tech.get("supplyPointCode") or ""
         is_gas = commodity_code == "P1"
 
-        billings = sorted(by_agreement.get(agreement, []), key=lambda x: (x["datum"] or "", x["cislo"]), reverse=True)
+        today_s = today.isoformat()
+        all_b = by_agreement.get(agreement, [])
+        # budoucí předpisy záloh (splatnost až v budoucnu) nejsou dluh – jdou do samostatného plánu
+        planned = sorted(
+            (b for b in all_b if b["kod"] in ADVANCE_KINDS and not b["zaplaceno"] and (b["splatnost"] or "") > today_s),
+            key=lambda x: x["splatnost"] or "",
+        )
+        billings = sorted(
+            (b for b in all_b if b not in planned),
+            key=lambda x: (x["datum"] or "", x["splatnost"] or "", x["cislo"]),
+            reverse=True,
+        )
         unpaid = [b for b in billings if b["uhradit"] and not b["zaplaceno"] and (b["zbyva"] or 0) > 0]
         invoices = [b for b in billings if b["kod"] in ("VYU", "FA", "INV") or b["typ"].lower().startswith("vyúčt")]
         readings = _readings(item.get("readings"))
@@ -185,6 +204,7 @@ def parse(raw: dict[str, Any], today: date | None = None) -> dict[str, dict[str,
             "nezaplacene": unpaid,
             "posledni_vyuctovani": invoices[0] if invoices else None,
             "doklady": billings[:24],
+            "zalohy_plan": planned[:12],
             "odecty": readings[-12:],
             "posledni_odecet": last_read,
             "spotreba_roky": year,

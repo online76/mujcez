@@ -65,6 +65,7 @@ SENSORS: tuple[MujCezSensorDescription, ...] = (
             "lze_zmenit": p["zaloha_lze_zmenit"],
             "proc_nelze_zmenit": p["zaloha_proc_nelze"],
             "zpusob_platby": p["platba_zaloh"],
+            "plan": [{"splatnost": z["splatnost"], "castka": z["castka"]} for z in p["zalohy_plan"]],
         },
     ),
     MujCezSensorDescription(
@@ -219,7 +220,7 @@ class MujCezSensor(CoordinatorEntity[MujCezCoordinator], SensorEntity):
         if desc.key == "prehled":
             self._unrecorded_attributes = frozenset(p.keys()) | {"mujcez_prehled"}
         elif desc.attrs:
-            self._unrecorded_attributes = frozenset({"historie", "doklady"})
+            self._unrecorded_attributes = frozenset({"historie", "doklady", "plan"})
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, code)},
             name=p["nazev"],

@@ -92,6 +92,14 @@ BILLINGS = [
     {"billingAccountingDocumentTypeText": "Záloha", "billingAccountingDocumentType": "ZAL",
      "billingTotalAmount": 3800, "billingAccountingDocumentDate": "2026-11-14", "agreementIdIsu": "000070123114",
      "isPaid": True, "balance": 0, "shouldBePaid": False, "statusText": "PAID", "billingAccountingDocumentNumber": "9"},
+    {"billingAccountingDocumentTypeText": "Záloha", "billingAccountingDocumentType": "BBP", "billingTotalAmount": 0.0,
+     "balance": 3800.0, "billingMaturityDate": "2026-12-14", "billingAccountingDocumentDate": "2026-10-07",
+     "agreementIdIsu": "000070123114", "isPaid": False, "shouldBePaid": True, "statusText": "UNPAID",
+     "billingAccountingDocumentNumber": "2638717391"},
+    {"billingAccountingDocumentTypeText": "Vyúčtování", "billingAccountingDocumentType": "VYU",
+     "billingTotalAmount": -6401.39, "balance": 0, "billingAccountingDocumentDate": "2026-10-07",
+     "agreementIdIsu": "000070123114", "isPaid": True, "shouldBePaid": False, "statusText": "PAID",
+     "billingAccountingDocumentNumber": "77"},
 ]
 
 
@@ -105,7 +113,10 @@ def test_parse():
     assert gas["zaloha"] == 3800 and gas["zaloha_pristi"] == "2026-12-14" and gas["zaloha_frekvence"] == "měsíčně"
     assert gas["spotreba_mesice"] == [] and gas["posledni_obdobi"]["kwh"] == 13589.28
     assert gas["vyuziti"] == "vytápění, vaření" and gas["distributor"] == "GasNet, s.r.o."
-    assert gas["k_uhrade"] == 0 and gas["doklady"][0]["typ"] == "Záloha"
+    assert gas["k_uhrade"] == 0
+    assert gas["zalohy_plan"][0]["castka"] == 3800 and gas["zalohy_plan"][0]["splatnost"] == "2026-12-14"
+    assert all(d["kod"] != "BBP" for d in gas["doklady"])
+    assert gas["posledni_vyuctovani"]["castka"] == -6401.39 and gas["posledni_vyuctovani"]["stav"] == "přeplatek"
     ele = out["859182400707048034"]
     assert ele["komodita"] == "elektrina" and ele["sazba"] == "D45D - Přímotop" and ele["dvoutarif"]
     assert ele["k_uhrade"] == 2612.27 and ele["k_uhrade_splatnost"] == "2026-11-25"
