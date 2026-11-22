@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 
 from homeassistant.components.frontend import add_extra_js_url
@@ -22,7 +23,9 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     """Zpřístupní kartu custom:mujcez-card (bez ruční registrace zdroje)."""
     card = Path(__file__).parent / "www" / "mujcez-card.js"
     await hass.http.async_register_static_paths([StaticPathConfig(CARD_URL, str(card), False)])
-    add_extra_js_url(hass, f"{CARD_URL}?v={VERSION}")
+    # verze v adrese podle obsahu souboru – prohlížeče po aktualizaci nenačtou starou kartu z mezipaměti
+    digest = await hass.async_add_executor_job(lambda: hashlib.sha1(card.read_bytes()).hexdigest()[:8])
+    add_extra_js_url(hass, f"{CARD_URL}?v={VERSION}-{digest}")
     return True
 
 
